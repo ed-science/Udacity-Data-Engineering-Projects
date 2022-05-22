@@ -11,6 +11,5 @@ class Request:
         response = requests.get(url, headers=headers, params=param)
         if response.status_code == 200:
             return json.loads(response.content)
-        else:
-            print(f"Request completed with Error. Response Code : {response.status_code}")
-            return None
+        print(f"Request completed with Error. Response Code : {response.status_code}")
+        return None

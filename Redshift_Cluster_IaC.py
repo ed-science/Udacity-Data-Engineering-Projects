@@ -71,7 +71,10 @@ def create_IAM_role(iam_client):
         logger.error(f"Error occured while applying policy : {e}")
         return False
 
-    return True if( (create_response['ResponseMetadata']['HTTPStatusCode'] == 200) and  (policy_response['ResponseMetadata']['HTTPStatusCode'] == 200) ) else False
+    return (
+        create_response['ResponseMetadata']['HTTPStatusCode'] == 200
+        and policy_response['ResponseMetadata']['HTTPStatusCode'] == 200
+    )
 
 
 def delete_IAM_role(iam_client):
@@ -102,7 +105,10 @@ def delete_IAM_role(iam_client):
         logger.error(f"Exception occured while deleting role : {e}")
         return False
 
-    return True if( (detach_response['ResponseMetadata']['HTTPStatusCode'] == 200) and  (delete_response['ResponseMetadata']['HTTPStatusCode'] == 200) ) else False
+    return (
+        detach_response['ResponseMetadata']['HTTPStatusCode'] == 200
+        and delete_response['ResponseMetadata']['HTTPStatusCode'] == 200
+    )
 
 
 
@@ -160,7 +166,15 @@ def get_cluster_status(redshift_client, cluster_identifier):
     response = redshift_client.describe_clusters(ClusterIdentifier = cluster_identifier)
     cluster_status = response['Clusters'][0]['ClusterStatus']
     logger.info(f"Cluster status : {cluster_status.upper()}")
-    return True if(cluster_status.upper() in ('AVAILABLE','ACTIVE', 'INCOMPATIBLE_NETWORK', 'INCOMPATIBLE_HSM', 'INCOMPATIBLE_RESTORE', 'INSUFFICIENT_CAPACITY', 'HARDWARE_FAILURE')) else False
+    return cluster_status.upper() in (
+        'AVAILABLE',
+        'ACTIVE',
+        'INCOMPATIBLE_NETWORK',
+        'INCOMPATIBLE_HSM',
+        'INCOMPATIBLE_RESTORE',
+        'INSUFFICIENT_CAPACITY',
+        'HARDWARE_FAILURE',
+    )
 
 def delete_cluster(redshift_client):
     """

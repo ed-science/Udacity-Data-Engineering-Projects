@@ -43,12 +43,21 @@ def process_log_file(cur, filepath):
 
     # convert timestamp column to datetime
     t = pd.Series(df['ts'], index=df.index)
-    
+
     # insert time data records
     column_labels = ["timestamp", "hour", "day", "weelofyear", "month", "year", "weekday"]
-    time_data = []
-    for data in t:
-        time_data.append([data ,data.hour, data.day, data.weekofyear, data.month, data.year, data.day_name()])
+    time_data = [
+        [
+            data,
+            data.hour,
+            data.day,
+            data.weekofyear,
+            data.month,
+            data.year,
+            data.day_name(),
+        ]
+        for data in t
+    ]
 
     time_df = pd.DataFrame.from_records(data = time_data, columns = column_labels)
 
@@ -67,13 +76,7 @@ def process_log_file(cur, filepath):
         
         # get songid and artistid from song and artist tables
         cur.execute(song_select, (row.song, row.artist, row.length))
-        results = cur.fetchone()
-        
-        if results:
-            songid, artistid = results
-        else:
-            songid, artistid = None, None
-
+        songid, artistid = results if (results := cur.fetchone()) else (None, None)
         # insert songplay record
         songplay_data = ( row.ts, row.userId, row.level, songid, artistid, row.sessionId, row.location, row.userAgent)
         cur.execute(songplay_table_insert, songplay_data)
@@ -91,18 +94,16 @@ def process_data(cur, conn, filepath, func):
     all_files = []
     for root, dirs, files in os.walk(filepath):
         files = glob.glob(os.path.join(root,'*.json'))
-        for f in files :
-            all_files.append(os.path.abspath(f))
-
+        all_files.extend(os.path.abspath(f) for f in files)
     # get total number of files found
     num_files = len(all_files)
-    print('{} files found in {}'.format(num_files, filepath))
+    print(f'{num_files} files found in {filepath}')
 
     # iterate over files and process
     for i, datafile in enumerate(all_files, 1):
         func(cur, datafile)
         conn.commit()
-        print('{}/{} files processed.'.format(i, num_files))
+        print(f'{i}/{num_files} files processed.')
 
 
 def main():
