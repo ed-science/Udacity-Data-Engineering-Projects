@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(
         description="A Example yelp business finder based on parameters such as term, location, price, ")
 
 api_key = config['KEYS']['API_KEY']
-headers = {'Authorization': 'Bearer %s' % api_key}
+headers = {'Authorization': f'Bearer {api_key}'}
 
 def to_string(data):
     return [str(value) for value in data.values()]
